@@ -1,2 +1,7 @@
 # IGNORE FOLDER
 WM_Codes/
+Restructured_Code/.vs/
+Restructured_Code/__pycache__/
+Restructured_Code/*.bak
+toDo.rtf
+

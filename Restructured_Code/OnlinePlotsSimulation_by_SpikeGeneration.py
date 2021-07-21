@@ -1,6 +1,7 @@
-""""
-Excecution time can be reduced by 60ms if we replace time.perf_counter with time.monotonic
-"""
+# This code generates spike Data 
+# ML events are required. 
+
+
 #import eventstream
 import numpy as np
 import time
@@ -233,3 +234,4 @@ time.sleep(1)
 # Plotting frame by frame
 animation = FuncAnimation(fig, func = animation_frame, fargs = (trial_count,ax),init_func=init,interval =100)
 plt.show()
+

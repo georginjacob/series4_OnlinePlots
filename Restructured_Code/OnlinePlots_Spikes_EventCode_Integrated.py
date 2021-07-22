@@ -13,6 +13,9 @@ import matplotlib.gridspec as gridspec
 import conditionevents
 import spikeevents
 
+# Network Address
+eCubeAddress = '192.168.137.1' # IP Address for eCube or ServerNode, for directly connecting and reading DigitalPanel via the eCube API
+openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
 
 global ltime, utime, nbin
 AllRelativeSpikes   =   [[],[],[]]
@@ -22,21 +25,25 @@ trial_count         =   [0]
 bins                =   np.arange(0, 3, 0.1)
 ax                  =   []
 
-# Event Codes Used
-start_ec            = 1101 
-stop_ec             = 1104
-same_ec             = 9001
-diff_ec             = 9002
-ec_shift_tt         = 9000  #Trial type event code shift
+# Event Codes directly used
+start_ec                = 1101 
+stop_ec                 = 1104
+same_ec                 = 9001
+diff_ec                 = 9002
+sample_on_ec            = 400
+sample_off_ec           = 401
+test_on_ec              = 402
 
-# Network Address
-eCubeAddress = '192.168.137.1' # IP Address for eCube or ServerNode, for directly connecting and reading DigitalPanel via the eCube API
-openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
+#  Footer Shifts  
+ec_shift_tt             = 9000  # 9000+  1 for same , 9000 +2 for different  
+ec_trial_error_shift    = 8500  # 8500 + 0 correct, 8500 + 6 wrong 
+
 
 
 # Plotting
-ltime   =   0
-utime   =   2 
+
+ltime   =   -0.5
+utime   =   3 
 nbin    =   20
 
 colors_value = ['C{}'.format(i) for i in range(6)] # Colours used
@@ -129,9 +136,18 @@ def animation_frame(FrameNumber,trial_count,ax):
     start_index = [i for i,v in enumerate(EventCodeArray[:N]) if v[1]==start_ec]
     if(bool(start_index) and len(ax)>0):
         time_start = EventCodeArray[start_index[0]][0]
+        
         # Finding all trail stop events
         stop_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==stop_ec and float(v[0])>(time_start) )]
-    
+        
+        # Finding all the sample ON times 
+        sampleON_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==sample_on_ec and float(v[0])>(time_start) )]
+
+        # Finding all sample OFF times
+        sampleOFF_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==sample_off_ec and float(v[0])>(time_start) )]
+
+        # Finding all test ON times
+        testON_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==test_on_ec and float(v[0])>(time_start) )]
     
     if(bool(start_index) and bool(stop_index)): # Execute only if trial start and stop is recorded
 
@@ -147,8 +163,10 @@ def animation_frame(FrameNumber,trial_count,ax):
         for i in range(stop_index[0],start_index[0]-1,-1):  
             EventCodeArray.pop(i)
 
-        # Finding the relative spike times
-        Relative_spike_times = [v[0]-time_start for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=time_start and v[0]<=time_stop)]
+        print(EventCodeArray)
+        # Finding the relative spike times wrt Sample  ON time s
+        time_sample_ON=EventCodeArray[sampleON_index[0]][0];
+        Relative_spike_times = [v[0]-time_sample_ON for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=time_start and v[0]<=time_stop)]
         AllRelativeSpikes[2]=AllRelativeSpikes[2]+Relative_spike_times
 
         # Trial_typewise analysis

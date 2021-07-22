@@ -18,7 +18,7 @@ def receive(SpikeArray, hostname='127.0.0.1', port=5557):
 				if eventcode == 2:
 					timestamp = int.from_bytes(parts[1][0:8], 'little', signed=False)/2.5e13
 					sortedID = int.from_bytes(parts[2][16:18], 'little', signed=False)
-					#print('Spike = ',sortedID)
-					if(sortedID==2):
+					print('Spike = ',sortedID)
+					if(sortedID==0):
 						SpikeArray.append([time.perf_counter(),sortedID, timestamp])
 						print('Spike = ',sortedID)

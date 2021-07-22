@@ -43,7 +43,7 @@ nbin    =   20
 colors_value = ['C{}'.format(i) for i in range(6)] # Colours used
 
 
-"""
+
 def do_eventcode():
     while(True):
         # Start of the trial
@@ -65,7 +65,7 @@ def do_eventcode():
         event_code   = 1104
         current_time= time.perf_counter()
         EventCodeArray.append([current_time,event_code])
-"""
+
 
 def do_spikes():
     while(True):
@@ -214,15 +214,18 @@ def animation_frame(FrameNumber,trial_count,ax):
             ax[2].set_title(title_names[2])
    
             
-pdi = conditionevents.eCubePDStream(address=eCubeAddress)
-pdi.start()
+#pdi = conditionevents.eCubePDStream(address=eCubeAddress)
+#pdi.start()
 
-t1 = threading.Thread(target=pdi.stream_detectstates,args = (EventCodeArray,))
-t1.start()
+#t1 = threading.Thread(target=pdi.stream_detectstates,args = (EventCodeArray,))
+#t1.start()
 
 
 spikethread = threading.Thread(target=spikeevents.receive, args=(SpikeArray, openephysAddress))
 spikethread.start()
+
+t1 = threading.Thread(target=do_eventcode)
+t1.start()
 
 t2 = threading.Thread(target=do_spikes)
 t2.start()

@@ -10,6 +10,7 @@ import random
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib.gridspec as gridspec
+from matplotlib.patches import Rectangle
 
 import conditionevents
 import spikeevents
@@ -37,7 +38,7 @@ openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster modu
 
 # Plotting
 ltime   =   0
-utime   =   2 
+utime   =   4
 nbin    =   20
 
 colors_value = ['C{}'.format(i) for i in range(6)] # Colours used
@@ -58,7 +59,19 @@ def do_eventcode():
         EventCodeArray.append([current_time,event_code])   
         
         # Trial Duration
-        seconds     = round(random.uniform(1,3),2)
+        # Random_fixation aquisition
+        seconds     = round(random.uniform(0.5,1),2)
+        time.sleep(seconds)
+
+        # Sample
+        EventCodeArray.append([current_time,400]) # sample ON event code
+        time.sleep(0.4) # 400 ms
+        EventCodeArray.append([current_time,401]) # sample OFF event code
+        time.sleep(0.2) # 200 ms
+
+        # Test ON 
+        EventCodeArray.append([current_time,402]) # sample ON event code
+        seconds     = round(random.uniform(0.75,2),2)
         time.sleep(seconds)
         
         # End of trial      
@@ -70,7 +83,7 @@ def do_eventcode():
 def do_spikes():
     while(True):
         # randomly generate spike duration
-        seconds = round(random.random(),2)
+        seconds = round(0.3*random.random(),2)
 
         # sleep for the duration
         time.sleep(seconds)
@@ -126,8 +139,18 @@ ax.append(f_ax4)
 ax.append(f_ax5)
 ax.append(f_ax6)
 
+
 for i in range(3):
     ax[i].set_title(title_names[i])
+
+
+
+for i in range(3):
+    ax[3+i].add_patch( Rectangle((0.2, 0.0),0.4, 100,color ='k',alpha=0.25) ) # Sample ON
+    ax[3+i].add_patch( Rectangle((0.8, 0.0),utime-0.8, 100,color ='k',alpha=0.25) ) # Sample ON
+
+
+
 
 
 # Initilizing the plot by setting axis limits
@@ -212,6 +235,10 @@ def animation_frame(FrameNumber,trial_count,ax):
             ax[2].clear()
             ax[2].hist(AllRelativeSpikes[2],bins=hist_bins,density=True,color=colors_value[2])
             ax[2].set_title(title_names[2])
+
+
+            
+
    
             
 #pdi = conditionevents.eCubePDStream(address=eCubeAddress)

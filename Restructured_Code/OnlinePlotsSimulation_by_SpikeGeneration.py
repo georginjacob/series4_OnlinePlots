@@ -264,4 +264,3 @@ time.sleep(1)
 # Plotting frame by frame
 animation = FuncAnimation(fig, func = animation_frame, fargs = (trial_count,ax),init_func=init,interval =100)
 plt.show()
-

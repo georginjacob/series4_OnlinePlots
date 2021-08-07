@@ -1,70 +1,65 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import matplotlib.gridspec as gridspec
-
-#generate random data
-nTrials=100
-data = np.random.random((nTrials,100))
-
-ltime   =   0
-utime   =   4
-nbin    =   10
-bins =np.linspace(ltime,utime,nbin+1)
-
-alldata = np.empty((nTrials,len(bins)-1))
-alldata[:] = np.NaN
-
-print(bins)
-for i in range(50):
-    counts,bins = np.histogram(data[i],bins=nbin,range=(0,1))
-    alldata[i][:]=counts
-marginals_alldata=np.nansum(alldata,axis=1)
+def animation_frame(FrameNumber,trial_count,ax):
+    global AllRelativeSpikes
+  
 
 
-array_has_nan       =   np. isnan(marginals_alldata)
-deltaT              =   (5-0)/9
-bin_width           =   (bins[1]-bins[0])
-bin_center          =   bins[:-1]+bin_width/2
-sum_alldata         =   np.nansum(alldata, axis=0)
-histogram_all_data  =   sum_alldata/(100*deltaT)
+    
 
+    if(bool(start_index) and len(ax)>0):
+        time_start = EventCodeArray[start_index[0]][0]
+        
+        # Finding all trail stop events
+        stop_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==stop_ec and float(v[0])>(time_start) )]
+        
+        # Finding all the sample ON times 
+        sampleON_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==sample_on_ec and float(v[0])>(time_start) )]
 
+        # Finding all sample OFF times
+        sampleOFF_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==sample_off_ec and float(v[0])>(time_start) )]
 
+        # Finding all test ON times
+        testON_index = [i for i,v in enumerate(EventCodeArray[:N]) if (v[1]==test_on_ec and float(v[0])>(time_start) )]
+    
+    if(bool(start_index) and bool(stop_index)): # Execute only if trial start and stop is recorded
 
-fig2= plt.figure(constrained_layout=True)
-#ax=[]
-#widths = [4, 4, 4]
-#heightratio = [2, 8]
-#spec = fig.add_gridspec(ncols=3, nrows=2, width_ratios=widths,height_ratios=heightratio)
-#f_ax1 = fig.add_subplot(spec[0, :])
-#f_ax2 = fig.add_subplot(spec[1, :-1])
-#f_ax3 = fig.add_subplot(spec[1:, -1])
-#f_ax4 = fig.add_subplot(spec[-1, 0])
-#f_ax5 = fig.add_subplot(spec[-1, -2])
+        time_stop = EventCodeArray[stop_index[0]][0]
+        trial_count[0] = trial_count[0]+1
+        
+        #print('Trial Count = ',trial_count)
+        # Finding the trial type
+       # print(EventCodeArray)
+        trial_type = [v[1] for i,v in enumerate(EventCodeArray[:N]) if  float(v[0])>(time_start) and float(v[0])<=time_stop and (v[1]==same_ec or v[1] ==diff_ec) ]
+        
+        # Discarding all the event codes between start and stop event codes
+        for i in range(stop_index[0],start_index[0]-1,-1):  
+            EventCodeArray.pop(i)
 
-#f_ax5.bar(bin_center,histogram_all_data,width=bin_width*0.9)
-widths = [4, 4, 4]
-heightratio = [2, 8]
-fig2 = plt.figure(constrained_layout=True)
-spec2 = gridspec.GridSpec(ncols=3, nrows=2, figure=fig2,width_ratios=widths, height_ratios=heightratio)
-f2_ax1 = fig2.add_subplot(spec2[0, 0])
-f2_ax2 = fig2.add_subplot(spec2[0, 1])
-f2_ax3 = fig2.add_subplot(spec2[1, 0])
-f2_ax4 = fig2.add_subplot(spec2[1, 1])
-f2_ax1.bar(bin_center,histogram_all_data,width=bin_width*0.9)
-f2_ax2.bar(bin_center,histogram_all_data,width=bin_width*0.9)
-plt.show()
+        print(EventCodeArray)
+        # Finding the relative spike times wrt Sample  ON time s
+        time_sample_ON=EventCodeArray[sampleON_index[0]][0];
+        Relative_spike_times = [v[0]-time_sample_ON for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=time_start and v[0]<=time_stop)]
+        AllRelativeSpikes[2]=AllRelativeSpikes[2]+Relative_spike_times
 
+        # Trial_typewise analysis
+        if(bool(trial_type)):# 0: Same 1: Different 
 
-#f_ax5.show()
+            index = int(trial_type[0])-ec_shift_tt-1 # adding the trial raster to subplots based on trial type
+            
+            AllRelativeSpikes[index]=AllRelativeSpikes[index]+Relative_spike_times # Saving trialwise relative spike times to all spikes array
 
-
-
-
-
-#Plot data
-#fig, axs = plt.subplots(2,3,figsize=(16,9), gridspec_kw={'height_ratios': [1, 2]})
-#axs[0,0].hist(z,np.arange(0,100,10))
-#axs[1,0].scatter(z['level_1'], z['level_0'],c=z[0])
-#plt.show()
+            # Raster
+            ax[3+index].eventplot (positions = Relative_spike_times,lineoffset =trial_count ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[index] )
+            ax[5].eventplot (positions = Relative_spike_times,lineoffset =trial_count ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[2] )
+   
+           
+            # Histogram
+            # Plotting for both Same and Different    
+            ax[index].clear()        
+            ax[0].set_ylabel(ylabel_names[0])
+            ax[index].set_title(title_names[index])
+            ax[index].hist(AllRelativeSpikes[index],bins=hist_bins,density=True,color=colors_value[index])
+            
+            # Plotting for all trials
+            ax[2].clear()
+            ax[2].hist(AllRelativeSpikes[2],bins=hist_bins,density=True,color=colors_value[2])
+            ax[2].set_title(title_names[2])

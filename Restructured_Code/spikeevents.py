@@ -3,6 +3,7 @@ import zmq
 import time
 
 # Receives spikes sorted by OpenEphys SpikeSorter (and broadcasted via EventBroadcaster)
+# Excecution time can be reduced by 60ms if we replace time.perf_counter with time.monotonic
 
 def receive(SpikeArray, hostname='127.0.0.1', port=5557):
 

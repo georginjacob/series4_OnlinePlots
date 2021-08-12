@@ -42,10 +42,15 @@ errorcode_wrong         = list(range(1,9+1))
 
 
 
+# maintain sample_width and delay_between sample and test as per the running experiment.
+sample_width=0.4 # 400 ms, 
+delay_between_sample_test= 0.2 # 200 ms
+
 # Plotting
-sample_width=0.4 # 400 ms
-delay_between_sample_test= 0.2
-relative_time_range = (-1,2) # min time, max time relative to Sample ON. 
+# relative time axis wrt to sample on time. 
+relative_time_range = (-0.2,sample_width+delay_between_sample_test+0.4)
+relative_time_range_globalraster = (-0.4,sample_width+delay_between_sample_test+2.0)
+
 nbin    =   20
 hist_bins =np.linspace(relative_time_range[0],relative_time_range[1],nbin+1)
 
@@ -60,11 +65,15 @@ tc_diff_wrong =1
 colors_value = ['C{}'.format(i) for i in range(6)] # Colours used
 
 (fig,ax) = lib.figure_layout_creation(0) # Initializing the Layout
-for i in range(5):
-    ax[i].add_patch( Rectangle((0.0,0.0 ),sample_width, 100,color ='k',alpha=0.25) ) # Sample ON
-    ax[i].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.25) ) # Test ON
-###############################################
+for i in range(7):
+    ax[i].add_patch( Rectangle((0.0,0.0 ),sample_width, 100,color ='k',alpha=0.1) ) # Sample ON
+    if(i!=4):
+        ax[i].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.1) ) # Test ON
+    else:
+        ax[i].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range_globalraster[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.1) ) # Test ON
 
+
+# ******************************************************************************************************************************************* #
 def animation_frame(FrameNumber):
     global RelativeSpikes_all_correct, RelativeSpikes_same_correct, RelativeSpikes_diff_correct, ax 
     global RelativeSpikes_same_wrong, RelativeSpikes_diff_wrong
@@ -109,11 +118,13 @@ def animation_frame(FrameNumber):
                 
                 # Spike times
                 ctrial_relative_spike_times = [v[0]-sampleON_time for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=(sampleON_time+relative_time_range[0]) and v[0]<=min(time_stop,(sampleON_time+relative_time_range[1])))]
+                ctrial_relative_spike_times_global = [v[0]-sampleON_time for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=(sampleON_time+relative_time_range_globalraster[0]) and v[0]<=min(time_stop,(sampleON_time+relative_time_range_globalraster[1])))]
                 
                 if(trial_outcome[0]==0):
                     # All spikes
-                    RelativeSpikes_all_correct=RelativeSpikes_all_correct+ctrial_relative_spike_times # For histogram
-                    ax[4].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_all_correct ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[2] )
+                    RelativeSpikes_all_correct=RelativeSpikes_all_correct+ctrial_relative_spike_times_global # For histogram
+                    ax[4].eventplot (positions = ctrial_relative_spike_times_global,lineoffset =tc_all_correct ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[2] )
+                    ax[4].set_xlim(relative_time_range_globalraster)
                     tc_all_correct+=1
 
                     # SAME trial
@@ -122,11 +133,11 @@ def animation_frame(FrameNumber):
                         # Histogram
                         RelativeSpikes_same_correct=RelativeSpikes_same_correct+ctrial_relative_spike_times 
                         ax[0].clear()
-                        ax[0].set_title('Correct SAME Trials')
+                        ax[0].set_title('Response correct SAME trials')
                         ax[0].set_ylabel('Norm. Firing Rate')
                         ax[0].set_ylim(0,1)
                         ax[0].add_patch( Rectangle((0.0,0.0 ),sample_width, 100,color ='k',alpha=0.25) ) # Sample ON
-                        ax[0].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.25) ) # Test ON
+                        ax[0].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.1) ) # Test ON
                         ax[0].set_xlim(relative_time_range)
  
                         
@@ -135,6 +146,7 @@ def animation_frame(FrameNumber):
 
                         # Raster
                         ax[2].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_same_correct ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[0] )
+                        ax[2].set_xlim(relative_time_range)
                         tc_same_correct+=1
 
                     if(trial_type[0]==2):
@@ -142,7 +154,7 @@ def animation_frame(FrameNumber):
                         # Histogram
                         RelativeSpikes_diff_correct=RelativeSpikes_diff_correct+ctrial_relative_spike_times 
                         ax[1].clear()        
-                        ax[1].set_title('Correct DIFF Trials')
+                        ax[1].set_title('Response correct DIFF trials')
                         ax[1].set_ylim(0,1)
                         ax[1].set_yticks([])
                         ax[1].hist(RelativeSpikes_diff_correct,bins=hist_bins,density=True,color=colors_value[1])
@@ -153,6 +165,7 @@ def animation_frame(FrameNumber):
 
                          # Raster
                         ax[3].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_diff_correct ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[1] )
+                        ax[3].set_xlim(relative_time_range)
                         tc_diff_correct+=1
 
                                    #********************************************************************************************************************************   
@@ -166,6 +179,7 @@ def animation_frame(FrameNumber):
 
                         # Raster
                         ax[5].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_same_wrong ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[0] )
+                        ax[5].set_xlim(relative_time_range)
                         tc_same_wrong+=1
 
                     if(trial_type[0]==2):
@@ -176,9 +190,14 @@ def animation_frame(FrameNumber):
 
                          # Raster
                         ax[6].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_diff_wrong ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[1] )
+                        ax[6].set_xlim(relative_time_range)
                         tc_diff_wrong+=1
 
+# ******************************************************************************************************************************************* #
 
+
+
+# PARALLEL THREADS
 pdi = conditionevents.eCubePDStream(address=eCubeAddress)
 pdi.start()
 

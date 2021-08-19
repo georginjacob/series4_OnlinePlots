@@ -12,7 +12,7 @@ import spikeevents
 import eventcode
 import customlib as lib
 # Network Address
-eCubeAddress = '192.168.137.1' # IP Address for eCube or ServerNode, for directly connecting and reading DigitalPanel via the eCube API
+eCubeAddress = '10.120.10.55' # IISc network ip of the PC running server-node control
 openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
 
 
@@ -47,11 +47,14 @@ sample_width=0.4 # 400 ms,
 delay_between_sample_test= 0.2 # 200 ms
 
 # Plotting
+ax0_ylim=1
+ax1_ylim=1
 # relative time axis wrt to sample on time. 
+bin_width = 0.02
 relative_time_range = (-0.2,sample_width+delay_between_sample_test+0.4)
 relative_time_range_globalraster = (-0.4,sample_width+delay_between_sample_test+2.0)
 
-nbin    =   20
+nbin    =   round((relative_time_range[1]-relative_time_range[0])/bin_width) # dividing by bin width
 hist_bins =np.linspace(relative_time_range[0],relative_time_range[1],nbin+1)
 
 # trial_counters
@@ -79,6 +82,7 @@ def animation_frame(FrameNumber):
     global RelativeSpikes_same_wrong, RelativeSpikes_diff_wrong
     global tc_same_correct,tc_diff_correct,tc_all_correct,tc_same_wrong,tc_diff_wrong
     global relative_time_range
+    global ax0_ylim, ax1_ylim
     # Calculate N to avoid considering synchronous updation. 
     # This current updation happens only till the first N value. Remaining will be considered during the next cycle. 
     N=len(EventCodeArray)
@@ -121,29 +125,28 @@ def animation_frame(FrameNumber):
                 ctrial_relative_spike_times_global = [v[0]-sampleON_time for i,v in enumerate(SpikeArray[:Nspike]) if (v[0]>=(sampleON_time+relative_time_range_globalraster[0]) and v[0]<=min(time_stop,(sampleON_time+relative_time_range_globalraster[1])))]
                 
                 if(trial_outcome[0]==0):
-                    # All spikes
-                    RelativeSpikes_all_correct=RelativeSpikes_all_correct+ctrial_relative_spike_times_global # For histogram
-                    ax[4].eventplot (positions = ctrial_relative_spike_times_global,lineoffset =tc_all_correct ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[2] )
-                    ax[4].set_xlim(relative_time_range_globalraster)
-                    tc_all_correct+=1
-
                     # SAME trial
                     if(trial_type[0]==1):
                         print('SAME')
+                        # All spikes
+                        RelativeSpikes_all_correct=RelativeSpikes_all_correct+ctrial_relative_spike_times_global # For histogram
+                        ax[4].eventplot (positions = ctrial_relative_spike_times_global,lineoffset =tc_all_correct ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[0] )
+                        ax[4].set_xlim(relative_time_range_globalraster)
+                        tc_all_correct+=1
                         # Histogram
                         RelativeSpikes_same_correct=RelativeSpikes_same_correct+ctrial_relative_spike_times 
                         ax[0].clear()
                         ax[0].set_title('Response correct SAME trials')
                         ax[0].set_ylabel('Norm. Firing Rate')
-                        ax[0].set_ylim(0,1)
                         ax[0].add_patch( Rectangle((0.0,0.0 ),sample_width, 100,color ='k',alpha=0.25) ) # Sample ON
                         ax[0].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.1) ) # Test ON
                         ax[0].set_xlim(relative_time_range)
- 
+                        data_ax0=ax[0].hist(RelativeSpikes_same_correct,bins=hist_bins,density=True,color=colors_value[0])
+                        # same_ylim on both histograms
+                        ax0_ylim=np.max(data_ax0[0])
+                        ax[0].set_ylim(0,1.2*max(ax0_ylim,ax1_ylim))
+                        ax[1].set_ylim(0,1.2*max(ax0_ylim,ax1_ylim))
                         
-                        
-                        ax[0].hist(RelativeSpikes_same_correct,bins=hist_bins,density=True,color=colors_value[0])
-
                         # Raster
                         ax[2].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_same_correct ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[0] )
                         ax[2].set_xlim(relative_time_range)
@@ -151,17 +154,25 @@ def animation_frame(FrameNumber):
 
                     if(trial_type[0]==2):
                         print('DIFF')
+                        # All spikes
+                        RelativeSpikes_all_correct=RelativeSpikes_all_correct+ctrial_relative_spike_times_global # For histogram
+                        ax[4].eventplot (positions = ctrial_relative_spike_times_global,lineoffset =tc_all_correct ,orientation ='horizontal', linewidths =2,linelengths =1,colors=colors_value[1] )
+                        ax[4].set_xlim(relative_time_range_globalraster)
+                        tc_all_correct+=1
                         # Histogram
                         RelativeSpikes_diff_correct=RelativeSpikes_diff_correct+ctrial_relative_spike_times 
                         ax[1].clear()        
                         ax[1].set_title('Response correct DIFF trials')
-                        ax[1].set_ylim(0,1)
                         ax[1].set_yticks([])
-                        ax[1].hist(RelativeSpikes_diff_correct,bins=hist_bins,density=True,color=colors_value[1])
+                        data_ax1=ax[1].hist(RelativeSpikes_diff_correct,bins=hist_bins,density=True,color=colors_value[1])
                         ax[1].add_patch( Rectangle((0.0,0.0 ),sample_width, 100,color ='k',alpha=0.25) ) # Sample ON
                         ax[1].add_patch( Rectangle((sample_width+delay_between_sample_test, 0.0),relative_time_range[1]-(sample_width+delay_between_sample_test), 100,color ='k',alpha=0.25) ) # Test ON
                         ax[1].set_xlim(relative_time_range)
- 
+                        
+                        # same_ylim on both histograms
+                        ax1_ylim=np.max(data_ax1[0])
+                        ax[0].set_ylim(0,1.2*max(ax0_ylim,ax1_ylim))
+                        ax[1].set_ylim(0,1.2*max(ax0_ylim,ax1_ylim))
 
                          # Raster
                         ax[3].eventplot (positions = ctrial_relative_spike_times,lineoffset =tc_diff_correct ,orientation ='horizontal', linewidths =2,linelengths =1, colors=colors_value[1] )

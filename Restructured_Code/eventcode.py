@@ -81,14 +81,16 @@ Dict={
 'bhv.fixNotInit'        : 606,
 'bhv.fixMaint'          : 607,
 'bhv.fixNotMaint'       : 608,
-'bhv.respCorr'          : 609,
-'bhv.respWrong'         : 610,
-'bhv.respNil'           : 611,
+'bhv.respGiven'         : 609,
+'bhv.respCorr'          : 610,
+'bhv.respWrong'         : 611,
+'bhv.respNil'           : 612,
 
 # REWARD
 'rew.juice'             : 700,
 
 # 'exp HEADER - sent before first trial in alert_function.m
+'exp.nan'               : 999,
 'exp.headerStart'       : 1000,
 'exp.headerStop'        : 1001,
 'exp.nameStart'         : 1002,
@@ -105,6 +107,10 @@ Dict={
 'trl.stop'              : 1102,
 'trl.footerStart'       : 1103,
 'trl.footerStop'        : 1104,
+'trl.taskCalib'         : 1105,
+'trl.taskFix'           : 1106,
+'trl.taskSameDiff'      : 1107,
+'trl.taskSearch'        : 1108,
 
 # 'trl FOOTER SHIFT - add to actual value
 'trl.trialShift'        : 2000,
@@ -118,10 +124,22 @@ Dict={
 'trl.expRespFree'       : 9000,
 'trl.expRespSame'       : 9001,
 'trl.expRespDiff'       : 9002,
+
+# 'trl FOOTER editable send within trial footer'
 'trl.edtStart'          : 9100,
 'trl.edtStop'           : 9101,
-'trl.edtShift'          : 10000,
 
+# trl FOOTER stim IDS send within trial footer
+'trl.stimStart'         :9200,
+'trl.stimStop'          :9201,
+
+# trl footer shift
+'trl.shift'             :10000,
+
+# TRL FOOTER PIC POSITION SHIFT- in dva between range of 100000-199999 (midpoint 150000)
+# Usage = Value(dva)*1000 + trl.picPosShift (for e.g. -8*1000+150000 = 142000)
+'trl.picPosShift'       :150000,
+    
 # ASCII SHIFT - add before sending ascii values
 'asc.shift'             : 200000,
 

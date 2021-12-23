@@ -13,8 +13,10 @@ import eventcode
 import customlib as lib
 # Network Address
 eCubeAddress = '10.120.10.55' # IISc network ip of the PC running server-node control
-#openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
-openephysAddress = '10.120.10.82'
+
+# IP address of the PC on which OEP is running. More specifically, OEP sends data as ethernet packets and we listens only from the specified IP.
+openephysAddress = '10.120.10.82' ## OP PC address
+#openephysAddress = '10.120.10.55' # WM PC address
 
 
 RelativeSpikes_all_correct   =  []
@@ -36,16 +38,16 @@ sample_off_ec           = eventcode.Dict['pic.sampleOff']
 test_on_ec              = eventcode.Dict['pic.testOn']
 
 #  Footer Shifts  
-ec_trialtype_shift      = 9000  # 9000+  1 for same , 9000 +2 for different  
+ec_trialtype_shift      = eventcode.Dict['trl.expRespFree']  # 9000+  1 for same , 9000 +2 for different  
 ec_trial_error_shift    = eventcode.Dict['trl.outcomeShift']   # 8500 + 0 correct, 8500 + 6 wrong 
 errorcode_correct       = 0
-errorcode_wrong         = list(range(1,9+1))
+errorcode_wrong         = list(range(1,9+1)) # This values comes from possible trial outcomes. Check err.* in event codes. 
 
 
 
 # maintain sample_width and delay_between sample and test as per the running experiment.
-sample_width=0.4 # 400 ms, 
-delay_between_sample_test= 0.2 # 200 ms
+sample_width              = 0.2 # 200 ms, 
+delay_between_sample_test = 0.2 # 200 ms
 
 # Plotting
 ax0_ylim=1

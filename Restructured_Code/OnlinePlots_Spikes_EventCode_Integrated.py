@@ -13,7 +13,8 @@ import eventcode
 import customlib as lib
 # Network Address
 eCubeAddress = '10.120.10.55' # IISc network ip of the PC running server-node control
-openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
+#openephysAddress = '10.120.10.55' # OpenEphys ~0.4.2-0.4.3 EventBroadcaster module address after spike sorting
+openephysAddress = '10.120.10.82'
 
 
 RelativeSpikes_all_correct   =  []
